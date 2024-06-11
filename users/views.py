@@ -14,9 +14,7 @@ from users.models import User
 class UserRegisterView(CreateView):
     model = User
     form_class = UserRegisterForm
-
-    def get_success_url(self):
-        return reverse("users:login")
+    success_url = reverse_lazy('users:login')
 
     def form_valid(self, form):
         token = secrets.token_hex(16)
@@ -25,7 +23,7 @@ class UserRegisterView(CreateView):
         user.is_active = False
         user.save()
         host = self.request.get_host()
-        url = f"http://{host}/users/confirm-register/{token}"
+        url = f"https://{host}/users/confirm-register/{token}"
         message = f"подтвердит почту {url}"
         send_mail("Верификация почты", message, settings.EMAIL_HOST_USER, [user.email])
 
