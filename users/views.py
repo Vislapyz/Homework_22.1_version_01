@@ -18,21 +18,19 @@ class UserRegisterView(CreateView):
     success_url = reverse_lazy('users:login')
 
     def form_valid(self, form):
-        token = secrets.token_hex(16)
         user = form.save()
-        user.token = token
         user.is_active = False
+        token = secrets.token_hex(16)
+        user.token = token
         user.save()
         host = self.request.get_host()
         url = f"https://{host}/users/confirm-register/{token}"
-        # message = f"подтвердит почту {url}"
         send_mail(
             subject='Подтверждение почты',
             message=f'Для подтверждения почты перейдите по ссылке: {url}',
             from_email=EMAIL_HOST_USER,
             recipient_list=[user.email]
         )
-        # send_mail("Верификация почты", message, settings.EMAIL_HOST_USER, [user.email])
         return super().form_valid(form)
 
 
