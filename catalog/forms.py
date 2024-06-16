@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm, BooleanField
+from django.forms import BooleanField, ModelForm
 
 from catalog.models import Product, Version
 
@@ -33,7 +33,8 @@ class ProductForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Product
-        fields = ("name", "description", "preview", "category", "price")
+        fields = ("name", "description", "preview", "category", "price", "author")
+
 
     def clean_name(self):
         """Метод для проверки валидации имени Продукта при создании нового объекта"""
@@ -62,3 +63,11 @@ class VersionForm(StyleFormMixin, ModelForm):
     class Meta:
         model = Version
         fields = ("id", "product", "name", "number", "is_current")
+
+
+class ProductModeratorForm(StyleFormMixin, ModelForm):
+    """Класс создание форм для реализации функционала группы Moderator"""
+
+    class Meta:
+        model = Product
+        fields = ("description", "category", "is_published")

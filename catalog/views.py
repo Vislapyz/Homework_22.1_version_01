@@ -1,20 +1,16 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import inlineformset_factory
+from django.http import HttpResponseForbidden
 from django.urls import reverse, reverse_lazy
-from django.views.generic import (
-    CreateView,
-    DeleteView,
-    DetailView,
-    ListView,
-    TemplateView,
-    UpdateView,
-)
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  TemplateView, UpdateView)
 
-from catalog.forms import ProductForm, VersionForm
+from catalog.forms import ProductForm, VersionForm, ProductModeratorForm
 from catalog.models import Product, Version
 
 
 class ContactsTemplateView(TemplateView):
+
     template_name = "catalog/contacts.html"
 
     def post(self, request, *args, **kwargs):
@@ -26,6 +22,7 @@ class ContactsTemplateView(TemplateView):
 
 
 class ProductListView(ListView):
+
     model = Product
 
     def get_context_data(self, *args, **kwargs):
@@ -40,6 +37,7 @@ class ProductListView(ListView):
 
 
 class ProductDetailView(DetailView):
+
     model = Product
 
     def get_object(self, queryset=None):
@@ -70,16 +68,12 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         return context_data
 
     def form_valid(self, form):
-
         context_data = self.get_context_data()
         formset = context_data["formset"]
-
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
             formset.instance = self.object
-
             formset.save()
-
             self.object = form.save()
             self.object.author = self.request.user
             self.object.save()
@@ -90,19 +84,26 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
                 self.get_context_data(form=form, formset=formset)
             )
 
-
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
-
     form_class = ProductForm
+
+    def get_form_class(self):
+        user = self.request.user
+        perms = ("catalog.set_published", "catalog.change_description", "catalog.change_category")
+        if user == self.object.author:
+            return ProductForm
+
+        if user.has_perms(perms):
+            return ProductModeratorForm
+
+        raise HttpResponseForbidden
 
     def get_success_url(self):
         return reverse("catalog:product_detail", args=[self.get_object().pk])
 
     def get_context_data(self, **kwargs):
-
         context_data = super().get_context_data(**kwargs)
-
         VersionFormset = inlineformset_factory(
             Product, Version, form=VersionForm, extra=1
         )
@@ -118,14 +119,11 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
         return context_data
 
     def form_valid(self, form):
-
         context_data = self.get_context_data()
         formset = context_data["formset"]
-
         if form.is_valid() and formset.is_valid():
             self.object = form.save()
             formset.instance = self.object
-            #
             formset.save()
             return super().form_valid(form)
 
