@@ -1,13 +1,11 @@
 import secrets
 
-from django.conf import settings
+from config.settings import EMAIL_HOST_USER
 from django.contrib.auth.views import PasswordChangeView
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, UpdateView
-
-from config.settings import EMAIL_HOST_USER
 from users.forms import UserForm, UserPasswordChangeForm, UserRegisterForm
 from users.models import User
 
@@ -24,7 +22,7 @@ class UserRegisterView(CreateView):
         user.token = token
         user.save()
         host = self.request.get_host()
-        url = f"https://{host}/users/confirm-register/{token}"
+        url = f"http://{host}/users/confirm-register/{token}"
         send_mail(
             subject='Подтверждение почты',
             message=f'Для подтверждения почты перейдите по ссылке: {url}',

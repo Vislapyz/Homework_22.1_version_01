@@ -142,8 +142,8 @@ LOGOUT_REDIRECT_URL = "/"
 
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = "mihstudent@yandex.ru"
-EMAIL_HOST_PASSWORD = "bkujkmwhbfxcfzxt"
+EMAIL_HOST_USER = "vislapyz@yandex.ru"
+EMAIL_HOST_PASSWORD = "yhqdqhbflgpjktsg"
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 SERVER_EMAIL = EMAIL_HOST_USER
