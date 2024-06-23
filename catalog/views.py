@@ -7,10 +7,10 @@ from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
 
 from catalog.forms import ProductForm, VersionForm, ProductModeratorForm
 from catalog.models import Product, Version
+from catalog.services import get_products_from_cache
 
 
 class ContactsTemplateView(TemplateView):
-
     template_name = "catalog/contacts.html"
 
     def post(self, request, *args, **kwargs):
@@ -22,8 +22,11 @@ class ContactsTemplateView(TemplateView):
 
 
 class ProductListView(ListView):
-
     model = Product
+
+    def get_queryset(self):
+        queryset = get_products_from_cache()
+        return queryset
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
@@ -37,8 +40,11 @@ class ProductListView(ListView):
 
 
 class ProductDetailView(DetailView):
-
     model = Product
+
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.object = None
 
     def get_object(self, queryset=None):
         self.object = super().get_object(queryset)
@@ -51,6 +57,10 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     form_class = ProductForm
     success_url = reverse_lazy("catalog:products_list")
+
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.object = None
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
@@ -84,9 +94,14 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
                 self.get_context_data(form=form, formset=formset)
             )
 
+
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
     form_class = ProductForm
+
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.object = None
 
     def get_form_class(self):
         user = self.request.user
