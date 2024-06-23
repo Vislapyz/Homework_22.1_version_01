@@ -42,10 +42,6 @@ class ProductListView(ListView):
 class ProductDetailView(DetailView):
     model = Product
 
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object = None
-
     def get_object(self, queryset=None):
         self.object = super().get_object(queryset)
         self.object.view_counter += 1
@@ -58,9 +54,6 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     form_class = ProductForm
     success_url = reverse_lazy("catalog:products_list")
 
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object = None
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
@@ -99,9 +92,6 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
     form_class = ProductForm
 
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object = None
 
     def get_form_class(self):
         user = self.request.user
